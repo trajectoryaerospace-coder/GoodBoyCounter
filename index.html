@@ -120,6 +120,10 @@
                 </h1>
             </div>
             <div class="flex items-center gap-2">
+                <!-- Sync status badge -->
+                <div id="sync-status" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 text-xs font-semibold border border-amber-200">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Connecting...
+                </div>
                 <button onclick="confirmResetAll()" title="Reset All Data" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
                     <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
                 </button>
@@ -132,7 +136,6 @@
 
         <!-- Central Score & Progress Card -->
         <section class="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-xl shadow-skyAccent-100/40 relative overflow-hidden text-center glow-sky">
-            <!-- Subtle background accent circles -->
             <div class="absolute -top-12 -right-12 w-40 h-40 bg-skyAccent-50 rounded-full blur-2xl pointer-events-none"></div>
             <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-skyAccent-50 rounded-full blur-2xl pointer-events-none"></div>
 
@@ -227,7 +230,7 @@
 
     <!-- Footer -->
     <footer class="w-full text-center py-6 text-xs text-slate-400 border-t border-slate-100 mt-8">
-        Good Boy Counter &bull; Designed with clean sky blue theme
+        Good Boy Counter &bull; Powered by Firebase Realtime Database
     </footer>
 
     <!-- Clear History Confirmation Modal -->
@@ -263,92 +266,42 @@
         </div>
     </div>
 
-    <!-- Clear History Confirmation Modal -->
-    <div id="confirm-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center">
-            <div class="w-12 h-12 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-900 mb-1">Clear History?</h3>
-            <p class="text-xs text-slate-500 mb-5">Are you sure you want to clear all log history? This action cannot be undone.</p>
-            <div class="flex gap-2">
-                <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50">Cancel</button>
-                <button onclick="executeClearHistory()" class="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm shadow-md shadow-rose-500/20">Clear All</button>
-            </div>
-        </div>
-    </div>
+    <!-- Firebase SDK Imports (Modular ES6) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 
-    <!-- Custom Image Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-100">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <i data-lucide="image" class="w-5 h-5 text-skyAccent-500"></i> Local PNG Badges
-                </h3>
-                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <p class="text-xs text-slate-500 mb-4">
-                The counter defaults to looking for <code class="bg-slate-100 px-1 py-0.5 rounded text-slate-700">1.png</code> and <code class="bg-slate-100 px-1 py-0.5 rounded text-slate-700">2.png</code> in your local web folder. You can also upload custom image files below to preview them directly!
-            </p>
-            
-            <div class="space-y-4">
-                <!-- 1.png slot -->
-                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div id="preview-1-container" class="w-10 h-10 rounded-lg bg-skyAccent-100 flex items-center justify-center text-skyAccent-600 overflow-hidden">
-                            <span class="text-xs font-bold">1.png</span>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-800">Positive (+1, +50, +100)</p>
-                            <p class="text-[10px] text-slate-400">Defaults to 1.png or thumbs up</p>
-                        </div>
-                    </div>
-                    <label class="px-3 py-1.5 bg-white border border-slate-200 text-xs font-semibold text-slate-600 rounded-lg cursor-pointer hover:bg-slate-100">
-                        Upload
-                        <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 1)">
-                    </label>
-                </div>
+        // Your Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAsPHscYDlufJMzBjHtm14khIBpEUiGFWw",
+            authDomain: "goodboycounter-73554.firebaseapp.com",
+            projectId: "goodboycounter-73554",
+            storageBucket: "goodboycounter-73554.firebasestorage.app",
+            messagingSenderId: "327432587006",
+            appId: "1:327432587006:web:a24f67068e4dec59d007af",
+            databaseURL: "https://goodboycounter-73554-default-rtdb.firebaseio.com"
+        };
 
-                <!-- 2.png slot -->
-                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div id="preview-2-container" class="w-10 h-10 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600 overflow-hidden">
-                            <span class="text-xs font-bold">2.png</span>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-800">Negative (-1, -50, -100)</p>
-                            <p class="text-[10px] text-slate-400">Defaults to 2.png or thumbs down</p>
-                        </div>
-                    </div>
-                    <label class="px-3 py-1.5 bg-white border border-slate-200 text-xs font-semibold text-slate-600 rounded-lg cursor-pointer hover:bg-slate-100">
-                        Upload
-                        <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 2)">
-                    </label>
-                </div>
-            </div>
+        // Initialize Firebase & Realtime Database
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-            <button onclick="closeSettingsModal()" class="mt-6 w-full py-2.5 rounded-xl bg-skyAccent-500 hover:bg-skyAccent-600 text-white font-semibold text-sm shadow-md shadow-skyAccent-500/20">Done</button>
-        </div>
-    </div>
-
-    <!-- Application JavaScript Logic -->
-    <script>
         // State Management
         const TARGET_SCORE = 1000;
         let score = 0;
         let logs = [];
         let hasCelebrated = false;
-        let customImg1 = null;
-        let customImg2 = null;
 
-        // Initialize icons & state on page load
+        // References to DB paths
+        const scoreRef = ref(db, 'counter/score');
+        const logsRef = ref(db, 'counter/logs');
+        const celebratedRef = ref(db, 'counter/hasCelebrated');
+
+        // Set up Realtime Listeners
         window.addEventListener('DOMContentLoaded', () => {
-            loadFromStorage();
             lucide.createIcons();
-            
-            // Setup reason input listeners
+
+            // Reason input helpers
             const reasonInput = document.getElementById('reason-input');
             const clearBtn = document.getElementById('clear-reason-btn');
             reasonInput.addEventListener('input', () => {
@@ -358,84 +311,98 @@
                     clearBtn.classList.add('hidden');
                 }
             });
+
+            // Listen for Score Changes
+            onValue(scoreRef, (snapshot) => {
+                const val = snapshot.val();
+                score = val !== null ? val : 0;
+                updateUI();
+                updateSyncBadge(true);
+            }, (error) => {
+                console.error("Score sync error:", error);
+                updateSyncBadge(false);
+            });
+
+            // Listen for HasCelebrated Flag
+            onValue(celebratedRef, (snapshot) => {
+                hasCelebrated = snapshot.val() || false;
+            });
+
+            // Listen for History Logs Changes
+            onValue(logsRef, (snapshot) => {
+                const data = snapshot.val();
+                logs = [];
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        logs.push({
+                            id: key,
+                            ...data[key]
+                        });
+                    });
+                    // Sort descending by timestamp/created
+                    logs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                }
+                updateUI();
+                updateSyncBadge(true);
+            }, (error) => {
+                console.error("Logs sync error:", error);
+                updateSyncBadge(false);
+            });
         });
 
-        // Load data from localStorage
-        function loadFromStorage() {
-            try {
-                const savedScore = localStorage.getItem('gbc_score');
-                const savedLogs = localStorage.getItem('gbc_logs');
-                const savedCelebration = localStorage.getItem('gbc_celebrated');
-                customImg1 = localStorage.getItem('gbc_img1');
-                customImg2 = localStorage.getItem('gbc_img2');
-
-                if (savedScore !== null) score = parseInt(savedScore, 10) || 0;
-                if (savedLogs !== null) logs = JSON.parse(savedLogs) || [];
-                if (savedCelebration !== null) hasCelebrated = JSON.parse(savedCelebration);
-
-                updateUI();
-            } catch (e) {
-                console.error("Failed to load from storage", e);
-            }
-        }
-
-        // Save data to localStorage
-        function saveToStorage() {
-            try {
-                localStorage.setItem('gbc_score', score);
-                localStorage.setItem('gbc_logs', JSON.stringify(logs));
-                localStorage.setItem('gbc_celebrated', JSON.stringify(hasCelebrated));
-                if (customImg1) localStorage.setItem('gbc_img1', customImg1);
-                if (customImg2) localStorage.setItem('gbc_img2', customImg2);
-            } catch (e) {
-                console.error("Failed to save to storage", e);
+        function updateSyncBadge(isLive) {
+            const badge = document.getElementById('sync-status');
+            if (isLive) {
+                badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold border border-emerald-200";
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync`;
+            } else {
+                badge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-semibold border border-rose-200";
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span> Offline`;
             }
         }
 
         // Adjust Counter Main Handler
-        function adjustCounter(delta, event) {
-            score += delta;
+        window.adjustCounter = function(delta, event) {
+            const newScore = score + delta;
             
             const reasonInput = document.getElementById('reason-input');
             const reason = reasonInput.value.trim();
 
-            // Create timestamp
             const now = new Date();
             const timestamp = formatTimestamp(now);
 
-            // Add to log
-            const logEntry = {
-                id: Date.now() + Math.random().toString(36).substr(2, 4),
+            // Create new log in Firebase
+            const newLogRef = push(logsRef);
+            set(newLogRef, {
                 delta: delta,
-                totalAfter: score,
+                totalAfter: newScore,
                 reason: reason,
-                timestamp: timestamp
-            };
-            logs.unshift(logEntry);
+                timestamp: timestamp,
+                createdAt: Date.now()
+            });
+
+            // Update score in Firebase
+            set(scoreRef, newScore);
 
             // Reset input
             reasonInput.value = '';
             document.getElementById('clear-reason-btn').classList.add('hidden');
 
-            // Trigger Particle Effects (+.webp / -.webp floating drift)
+            // Trigger Particle Animation (+.webp / -.webp floating drift)
             triggerDriftEffect(delta > 0 ? 1 : 2, event);
 
             // Check Celebration Trigger
-            if (score >= TARGET_SCORE && !hasCelebrated) {
-                hasCelebrated = true;
+            if (newScore >= TARGET_SCORE && !hasCelebrated) {
+                set(celebratedRef, true);
                 setTimeout(triggerCelebration, 400);
             }
-
-            saveToStorage();
-            updateUI();
         }
 
         // Create 3 floating drift images/badges
         function triggerDriftEffect(type, event) {
             const container = document.getElementById('particle-container');
-            const count = 3; // Spit out 3 images as specified
+            const count = 3;
 
-            // Determine origin point (click location or fallback to center screen)
             let startX = window.innerWidth / 2;
             let startY = window.innerHeight / 2;
             if (event && event.clientX) {
@@ -447,9 +414,8 @@
                 const elem = document.createElement('div');
                 elem.className = 'drift-particle w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg rounded-2xl bg-white/90 border border-slate-100 backdrop-blur';
                 
-                // Set CSS Variables for random trajectory & rotation drift
                 const angle = (Math.PI * 2 / count) * i + (Math.random() * 0.4 - 0.2);
-                const distance = 90 + Math.random() * 70; // Drift distance
+                const distance = 90 + Math.random() * 70;
                 const dx = Math.cos(angle) * distance;
                 const dy = Math.sin(angle) * distance;
                 const rot = (Math.random() * 40 - 20) + (type === 1 ? 15 : -15);
@@ -460,7 +426,6 @@
                 elem.style.left = `${startX}px`;
                 elem.style.top = `${startY}px`;
 
-                // Try to load +.webp or -.webp with SVG fallback graphics
                 const imgName = type === 1 ? '+.webp' : '-.webp';
                 const isPositive = type === 1;
 
@@ -475,7 +440,6 @@
                 container.appendChild(elem);
                 lucide.createIcons({ props: {}, nameAttr: 'data-lucide', root: elem });
 
-                // Auto remove after animation completes
                 setTimeout(() => {
                     elem.remove();
                 }, 1250);
@@ -500,18 +464,15 @@
 
         // Update UI Elements
         function updateUI() {
-            // Update counter display with pop effect
             const counterElem = document.getElementById('counter-value');
             counterElem.textContent = score.toLocaleString();
             counterElem.classList.add('scale-105', 'text-skyAccent-600');
             setTimeout(() => counterElem.classList.remove('scale-105', 'text-skyAccent-600'), 150);
 
-            // Update Progress Bar
             const progressPercent = Math.min(Math.max((score / TARGET_SCORE) * 100, 0), 100);
             document.getElementById('progress-bar').style.width = `${progressPercent}%`;
             document.getElementById('progress-text').textContent = `${score.toLocaleString()} / 1,000`;
 
-            // Update Logs List
             renderLogs();
         }
 
@@ -572,13 +533,11 @@
             lucide.createIcons({ props: {}, nameAttr: 'data-lucide', root: logList });
         }
 
-        // Escape HTML to prevent XSS in reasons
         function escapeHtml(str) {
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // Clear reason input button helper
-        function clearReasonInput() {
+        window.clearReasonInput = function() {
             const reasonInput = document.getElementById('reason-input');
             reasonInput.value = '';
             document.getElementById('clear-reason-btn').classList.add('hidden');
@@ -586,7 +545,7 @@
         }
 
         // Log Editing Handlers
-        function openEditModal(id) {
+        window.openEditModal = function(id) {
             const entry = logs.find(l => l.id === id);
             if (!entry) return;
 
@@ -597,59 +556,54 @@
             modal.classList.remove('opacity-0', 'pointer-events-none');
         }
 
-        function closeEditModal() {
+        window.closeEditModal = function() {
             const modal = document.getElementById('edit-modal');
             modal.classList.add('opacity-0', 'pointer-events-none');
         }
 
-        function saveLogEdit() {
+        window.saveLogEdit = function() {
             const id = document.getElementById('edit-entry-id').value;
             const newReason = document.getElementById('edit-reason-input').value.trim();
 
-            const entry = logs.find(l => l.id === id);
-            if (entry) {
-                entry.reason = newReason;
-                saveToStorage();
-                updateUI();
+            if (id) {
+                const itemRef = ref(db, `counter/logs/${id}`);
+                update(itemRef, { reason: newReason });
             }
             closeEditModal();
         }
 
         // Delete Single Log Entry
-        function deleteLogEntry(id) {
-            logs = logs.filter(l => l.id !== id);
-            saveToStorage();
-            updateUI();
+        window.deleteLogEntry = function(id) {
+            if (id) {
+                const itemRef = ref(db, `counter/logs/${id}`);
+                remove(itemRef);
+            }
         }
 
-        // Clear All Logs History with Confirmation
-        function promptClearHistory() {
+        // Clear All Logs History with Confirmation Modal
+        window.promptClearHistory = function() {
             const modal = document.getElementById('clear-confirm-modal');
             modal.classList.remove('opacity-0', 'pointer-events-none');
         }
 
-        function closeClearConfirmModal() {
+        window.closeClearConfirmModal = function() {
             const modal = document.getElementById('clear-confirm-modal');
             modal.classList.add('opacity-0', 'pointer-events-none');
         }
 
-        function confirmClearHistory() {
-            logs = [];
-            saveToStorage();
-            updateUI();
+        window.confirmClearHistory = function() {
+            remove(logsRef);
             closeClearConfirmModal();
         }
 
         // Reset Everything
-        function confirmResetAll() {
-            score = 0;
-            logs = [];
-            hasCelebrated = false;
-            saveToStorage();
-            updateUI();
+        window.confirmResetAll = function() {
+            set(scoreRef, 0);
+            remove(logsRef);
+            set(celebratedRef, false);
         }
 
-        // Trigger Grand Celebration Confetti Effect
+        // Celebration Confetti Effect
         function triggerCelebration() {
             const modal = document.getElementById('celebration-modal');
             const card = document.getElementById('celebration-card');
@@ -658,7 +612,6 @@
             card.classList.remove('scale-90');
             card.classList.add('scale-100');
 
-            // Fire multiple rounds of confetti
             if (typeof confetti === 'function') {
                 const duration = 3 * 1000;
                 const animationEnd = Date.now() + duration;
@@ -676,7 +629,7 @@
             }
         }
 
-        function closeCelebration() {
+        window.closeCelebration = function() {
             const modal = document.getElementById('celebration-modal');
             const card = document.getElementById('celebration-card');
 
